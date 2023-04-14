@@ -1,53 +1,45 @@
-import { useState, useEffect } from "react";
-import { OpenAIApi, Configuration } from "openai"
 
-const configuration = new Configuration({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_KEY_API,
-});
-
-const openai = new OpenAIApi(configuration);
-
-const useOpenAI = () => {
-  const [chatGPTAnswer, setChatGPTAnswer] = useState<string[]>([])
-
-  useEffect(() => {
-    async function fetchData() {
-      const completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
-        messages:[
-          {"role": "system", "content": "you are a human."},
-          {"role": "user", "content": "Salut, Comment vas tu?"}, 
-        ]
-      });
-      const messageContent = completion.data.choices[0].message?.content;
-      if (messageContent && typeof messageContent === "string") {
-        const newChatGPTAnswer = [...chatGPTAnswer, messageContent];
-        setChatGPTAnswer(newChatGPTAnswer);
-      }
-    }
-    fetchData()
-  }, [])
-  return chatGPTAnswer
-}
+import { useOpenAI } from "@/utils/api";
+import { useState } from "react";
+import { Message } from '../components/Message';
 
 
 export default function Home() {
 
-  const chatGPTAnswer = useOpenAI()
+  const [ message, setMessage ] = useState<string>("")
+  
+  const [ userMessage, setUserMessage ] = useState<string[]>([])
+  const [ openAIMessage, setOpenAIMessage ] = useState<string[]>([])
+  const fetchChatGPTAnswer = useOpenAI()
 
-  console.log(chatGPTAnswer)
 
+  const handleSend = async () => {
+    const answer = await fetchChatGPTAnswer(message);
+    console.log(answer)
+    setUserMessage([...userMessage, message]);
+    if (answer !== undefined) {
+      setOpenAIMessage([...openAIMessage, answer]);
+    }
+    setMessage("");
+  }
 
 
   return (
     <main>
-      {chatGPTAnswer.map(message => {
-        return(
-          <div style={{marginTop: '50px' }}>
-            {message}
+      <div>
+        <h2>Conversation:</h2>
+        {userMessage.map((msg, index) => (
+          <div key={index}>
+            <Message user={true} message={msg} />
+            <Message user={false} message={openAIMessage[index]} />
           </div>
-        )
-      })}
+        ))}
+      </div>
+      <div>
+        <label>Message: </label>
+        <input onChange={(event) => setMessage(event?.target.value)} value={message} />
+        <button type="submit" onClick={handleSend}>send</button>
+      </div>
     </main>
   )
 }
