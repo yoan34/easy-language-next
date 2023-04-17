@@ -1,28 +1,46 @@
 import { useState, useEffect, useCallback } from "react";
-import { OpenAIApi, Configuration } from "openai"
+import axios from "axios";
 
-const configuration = new Configuration({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_KEY_API,
-});
+const URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-const openai = new OpenAIApi(configuration);
+export const correctMessageFromUser = (userMessage: string[], userCorrection: string[], setUserCorrection: Function) => {
+  const message = userMessage[userMessage.length - 1];
 
+  axios.post(`${URL}/correct_message`, {input: message}).then((response) => {
+    setUserCorrection([ ...userCorrection, response.data ])
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
 
+export const translateMessageFromOpenAI = (userMessage: string[], openAITranslate: string[], setOpenAITranslate: Function) => {
+  const message = userMessage[userMessage.length - 1];
 
-export const useOpenAI = () => {
-  const fetchChatGPTAnswer = useCallback(async (message: string) => {
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages:[
-        {"role": "system", "content": "you are a human."},
-        {"role": "user", "content": message}, 
-      ]
-    });
-    const messageContent = completion.data.choices[0].message?.content;
-    if (messageContent && typeof messageContent === "string") {
+  axios.post(`${URL}/translate_message`, {input: message}).then((response) => {
+    setOpenAITranslate([ ...openAITranslate, response.data ])
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
+
+export const getMessageFromOpenAI = async (
+  message: string,
+  setMessage: Function,
+  openAIMessage: string[],
+  setOpenAIMessage: Function,
+) => {
+  const url = "http://localhost:8000/message";
+  const data = {input: message};
+  
+  try {
+    const response = await axios.post(url, data);
+    if (response.data !== undefined) {
+      setOpenAIMessage([ ...openAIMessage, response.data ]);
     }
-    return messageContent
-  }, [])
-
-  return fetchChatGPTAnswer
+    setMessage("");
+  } catch (error) {
+    console.error(error);
+  }
 }
