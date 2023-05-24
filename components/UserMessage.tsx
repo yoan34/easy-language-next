@@ -9,9 +9,7 @@ interface UserMessageProps {
 
 const UserMessage = ({ message, correction }: UserMessageProps) => {
 
-
   const [ showCorrection, setShowCorrection ] = useState<boolean>(false)
-
 
   return(
     <>

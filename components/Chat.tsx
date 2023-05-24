@@ -38,13 +38,6 @@ const Chat = () => {
     getMessageFromOpenAI(message, setMessage, openAIMessage, setOpenAIMessage)
   }
 
-
-  const lastTranslate = openAITranslate[openAITranslate.length - 1];
-  const lastCorrection = userCorrection[userCorrection.length - 1];
-
-
-  console.log(userCorrection)
-
   return (
     <>
       <div className="chat">
@@ -75,6 +68,7 @@ const Chat = () => {
       </div>
       <style jsx>
         {`
+        
           .container-chat {
             height: 80vh;
             max-height: 80vh;
@@ -84,7 +78,7 @@ const Chat = () => {
           .chat {
             display: flex;
             flex-direction: column;
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
 	          box-shadow: 8px 8px 22px#c6c6c6;
 }

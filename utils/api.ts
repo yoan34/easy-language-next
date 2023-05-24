@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 const URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -6,7 +5,7 @@ const URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 export const correctMessageFromUser = (userMessage: string[], userCorrection: string[], setUserCorrection: Function) => {
   const message = userMessage[userMessage.length - 1];
 
-  axios.post(`${URL}/correct_message`, {input: message}).then((response) => {
+  axios.post(`${URL}/correct_message`, {input: message, context: userMessage }).then((response) => {
     setUserCorrection([ ...userCorrection, response.data ])
   })
   .catch((error) => {
@@ -31,11 +30,9 @@ export const getMessageFromOpenAI = async (
   openAIMessage: string[],
   setOpenAIMessage: Function,
 ) => {
-  const url = "http://localhost:8000/message";
-  const data = {input: message};
   
   try {
-    const response = await axios.post(url, data);
+    const response = await axios.post(`${URL}/message`, {input: message});
     if (response.data !== undefined) {
       setOpenAIMessage([ ...openAIMessage, response.data ]);
     }
